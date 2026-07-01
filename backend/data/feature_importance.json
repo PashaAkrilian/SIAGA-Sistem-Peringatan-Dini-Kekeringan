@@ -1,0 +1,166 @@
+{
+  "shap": [
+    {
+      "feature": "lst_Jawa",
+      "value": 0.017509691417217255
+    },
+    {
+      "feature": "ndvi_Jawa",
+      "value": 0.014878670684993267
+    },
+    {
+      "feature": "lst_Indo",
+      "value": 0.012975065037608147
+    },
+    {
+      "feature": "ndvi_NusaTenggara",
+      "value": 0.011791775934398174
+    },
+    {
+      "feature": "ndvi_Indo",
+      "value": 0.010763762518763542
+    },
+    {
+      "feature": "ndvi_Sumatera",
+      "value": 0.009334812872111797
+    },
+    {
+      "feature": "ndvi_Kalimantan",
+      "value": 0.007929224520921707
+    },
+    {
+      "feature": "lst_NusaTenggara",
+      "value": 0.004319893196225166
+    },
+    {
+      "feature": "precip_Indo",
+      "value": 0.0036980388686060905
+    },
+    {
+      "feature": "precip_Sulawesi",
+      "value": 0.0032240787986665964
+    },
+    {
+      "feature": "precip_Papua",
+      "value": 0.0028146090917289257
+    },
+    {
+      "feature": "lst_Sulawesi",
+      "value": 0.0023555138614028692
+    },
+    {
+      "feature": "lst_Kalimantan",
+      "value": 0.0022203405387699604
+    },
+    {
+      "feature": "precip_Sumatera",
+      "value": 0.002123524434864521
+    },
+    {
+      "feature": "ndvi_Maluku",
+      "value": 0.0020303362980484962
+    },
+    {
+      "feature": "precip_Maluku",
+      "value": 0.0012334294151514769
+    },
+    {
+      "feature": "lst_Sumatera",
+      "value": 0.0011687912046909332
+    },
+    {
+      "feature": "lst_Maluku",
+      "value": 0.0010885783703997731
+    },
+    {
+      "feature": "Suhu_Permukaan_C",
+      "value": 0.000883710163179785
+    },
+    {
+      "feature": "lst_Papua",
+      "value": 0.000872866134159267
+    }
+  ],
+  "gain": [
+    {
+      "feature": "lst_Jawa",
+      "value": 0.13069289922714233
+    },
+    {
+      "feature": "ndvi_Jawa",
+      "value": 0.1008409932255745
+    },
+    {
+      "feature": "ndvi_NusaTenggara",
+      "value": 0.10018672794103622
+    },
+    {
+      "feature": "lst_NusaTenggara",
+      "value": 0.09907370805740356
+    },
+    {
+      "feature": "lst_Indo",
+      "value": 0.07413319498300552
+    },
+    {
+      "feature": "lst_Sumatera",
+      "value": 0.04801177233457565
+    },
+    {
+      "feature": "Suhu_Permukaan_C",
+      "value": 0.03729279339313507
+    },
+    {
+      "feature": "ndvi_Sumatera",
+      "value": 0.03217792138457298
+    },
+    {
+      "feature": "lst_Kalimantan",
+      "value": 0.029539169743657112
+    },
+    {
+      "feature": "precip_Maluku",
+      "value": 0.029346821829676628
+    },
+    {
+      "feature": "ndvi_Kalimantan",
+      "value": 0.023874685168266296
+    },
+    {
+      "feature": "lst_Sulawesi",
+      "value": 0.021609779447317123
+    },
+    {
+      "feature": "ONI_lag_3",
+      "value": 0.020229758694767952
+    },
+    {
+      "feature": "lst_Maluku",
+      "value": 0.0145229771733284
+    },
+    {
+      "feature": "ndvi_Indo",
+      "value": 0.012909768149256706
+    },
+    {
+      "feature": "precip_Papua",
+      "value": 0.012452591210603714
+    },
+    {
+      "feature": "lst_Papua",
+      "value": 0.010913611389696598
+    },
+    {
+      "feature": "Curah_Hujan_mm",
+      "value": 0.010541055351495743
+    },
+    {
+      "feature": "precip_Jawa",
+      "value": 0.009692709892988205
+    },
+    {
+      "feature": "precip_Sumatera",
+      "value": 0.009083361364901066
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+[
+  {
+    "island": "Indo",
+    "correlation_with_oni": -0.18682524648001586,
+    "current_score": 0.77813303
+  },
+  {
+    "island": "Sumatera",
+    "correlation_with_oni": -0.1668191135418021,
+    "current_score": 0.77375865
+  },
+  {
+    "island": "Jawa",
+    "correlation_with_oni": -0.18955147912173045,
+    "current_score": 0.80417454
+  },
+  {
+    "island": "Kalimantan",
+    "correlation_with_oni": -0.14847264309192282,
+    "current_score": 0.75191855
+  },
+  {
+    "island": "Sulawesi",
+    "correlation_with_oni": -0.1673529377385047,
+    "current_score": 0.71693206
+  },
+  {
+    "island": "NusaTenggara",
+    "correlation_with_oni": -0.15713845690740938,
+    "current_score": 0.7219678
+  },
+  {
+    "island": "Maluku",
+    "correlation_with_oni": -0.10689865111977291,
+    "current_score": 0.71318686
+  },
+  {
+    "island": "Papua",
+    "correlation_with_oni": -0.09239204856315332,
+    "current_score": 0.6625839
+  }
+]
