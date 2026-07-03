@@ -10,6 +10,8 @@ Jalankan dev server:
 Dokumentasi interaktif otomatis tersedia di:
     http://localhost:8000/docs
 """
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -26,6 +28,13 @@ from .schemas import (
     SimulationResponse,
 )
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    auth_db.init_db()
+    yield
+
+
 app = FastAPI(
     title="SDCI Drought Early Warning System API",
     description=(
@@ -34,6 +43,7 @@ app = FastAPI(
         "proyeksi 2026, feature importance (SHAP), dan simulasi what-if."
     ),
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS: izinkan frontend (Vite dev server & production) memanggil API ini.
@@ -54,11 +64,6 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
-
-
-@app.on_event("startup")
-def _startup():
-    auth_db.init_db()
 
 
 @app.get("/")

@@ -1,7 +1,8 @@
-# SIAGA — Sistem Peringatan Dini Kekeringan
+# SIAGA — Indonesia Drought Early Warning System
 
-**SDCI Early Warning System** — dashboard interaktif berbasis machine learning
-untuk forecasting risiko kekeringan Indonesia (Godzilla El Niño 2026).
+**SDCI Early Warning System** — an interactive, machine-learning-powered
+dashboard for forecasting drought risk across Indonesia (Godzilla El Niño
+2026 scenario).
 
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
@@ -11,30 +12,36 @@ untuk forecasting risiko kekeringan Indonesia (Godzilla El Niño 2026).
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-Web app full-stack yang mengubah riset XGBoost (forecasting kekeringan
-Godzilla El Niño 2026) menjadi produk yang bisa dipakai: dashboard interaktif
-dengan simulator proyeksi *real-time*.
+A full-stack web application that turns XGBoost research (drought forecasting
+under the Godzilla El Niño 2026 scenario) into a usable product: an
+interactive dashboard with a real-time projection simulator.
 
-Dibangun dari notebook riset `godzila-el-nino.ipynb` menjadi aplikasi
-**Python (FastAPI) + React** yang siap di-deploy.
+Built from the research notebook `godzila-el-nino.ipynb` into a deployable
+**Python (FastAPI) + React** application, complete with JWT authentication,
+automated tests, Docker support, and production deployment configs.
+
+## Live Demo
+
+- **Dashboard:** https://frontend-nu-silk-76.vercel.app
+- **API:** https://siaga-backend-production-381a.up.railway.app (interactive docs at `/docs`)
 
 ---
 
-## Daftar Isi
+## Table of Contents
 
-- [Arsitektur](#arsitektur)
+- [Architecture](#architecture)
 - [Tech Stack](#tech-stack)
-- [Menjalankan Secara Lokal](#menjalankan-secara-lokal)
-- [Endpoint API](#endpoint-api)
-- [Autentikasi](#autentikasi)
+- [Running Locally](#running-locally)
+- [API Endpoints](#api-endpoints)
+- [Authentication](#authentication)
 - [Testing](#testing)
-- [Deploy](#deploy)
-- [Catatan Teknis](#catatan-teknis)
-- [Lisensi](#lisensi)
+- [Deployment](#deployment)
+- [Technical Notes](#technical-notes)
+- [License](#license)
 
 ---
 
-## Arsitektur
+## Architecture
 
 ```
 ┌──────────────────┐     REST/JSON      ┌────────────────────┐
@@ -44,37 +51,38 @@ Dibangun dari notebook riset `godzila-el-nino.ipynb` menjadi aplikasi
 └──────────────────┘                     └─────────┬──────────┘
                                                      │ load once
                                           ┌──────────┴───────────┐
-                                          │  4 model XGBoost .json │
-                                          │  (main + q10/q50/q90)  │
-                                          │  + artefak JSON        │
+                                          │  4 XGBoost .json      │
+                                          │  models (main +       │
+                                          │  q10/q50/q90)         │
+                                          │  + JSON artifacts      │
                                           └────────────────────────┘
 ```
 
-Tiga bagian:
+Three main parts:
 
-| Folder      | Isi                                                            |
-|-------------|----------------------------------------------------------------|
-| `training/` | Script `train.py` — melatih ulang model dari CSV mentah        |
-| `backend/`  | API FastAPI yang menyajikan model & menjalankan simulasi live  |
-| `frontend/` | Dashboard React                                                |
+| Folder      | Contents                                                       |
+|-------------|------------------------------------------------------------------|
+| `training/` | `train.py` — retrains the model from the raw CSV dataset         |
+| `backend/`  | FastAPI service that serves the model and runs live simulations  |
+| `frontend/` | React dashboard                                                   |
 
 ---
 
 ## Tech Stack
 
-| Layer      | Bahasa / Tools                                                  |
-|------------|-------------------------------------------------------------------|
-| Backend    | Python · FastAPI · Uvicorn · Pydantic                             |
-| Auth       | PyJWT · bcrypt · SQLite (stdlib `sqlite3`)                         |
-| ML / Data  | XGBoost · pandas · NumPy · scikit-learn · SHAP · Optuna           |
-| Frontend   | JavaScript (JSX) · React 18 · Vite · Recharts · CSS               |
-| Deploy     | Docker · Railway / Render (backend) · Vercel / Netlify (frontend) |
+| Layer      | Language / Tools                                                    |
+|------------|-----------------------------------------------------------------------|
+| Backend    | Python · FastAPI · Uvicorn · Pydantic                                 |
+| Auth       | PyJWT · bcrypt · SQLite (stdlib `sqlite3`)                             |
+| ML / Data  | XGBoost · pandas · NumPy · scikit-learn · SHAP · Optuna               |
+| Frontend   | JavaScript (JSX) · React 18 · Vite · Recharts · CSS                   |
+| Deploy     | Docker · Railway / Render (backend) · Vercel / Netlify (frontend)     |
 
 ---
 
-## Menjalankan Secara Lokal
+## Running Locally
 
-### 1. Latih model (menghasilkan artefak di `backend/data/`)
+### 1. Train the model (generates artifacts in `backend/data/`)
 
 ```bash
 cd training
@@ -82,32 +90,32 @@ pip install -r ../backend/requirements.txt optuna shap scikit-learn
 python train.py
 ```
 
-Ini menghasilkan: `model_main.json`, `model_q10/50/90.json`, dan sejumlah
-file JSON (metrics, historical, forecast, feature importance).
+This produces `model_main.json`, `model_q10/50/90.json`, and a set of JSON
+artifacts (metrics, historical data, forecast, feature importance).
 
-> Model hasil training sudah disertakan di `backend/data/`, jadi langkah ini
-> opsional kalau kamu cuma mau menjalankan app-nya.
+> Trained model artifacts are already included in `backend/data/`, so this
+> step is optional if you just want to run the app.
 
 ### 2. Backend
 
 ```bash
 cd backend
-pip install -r requirements-dev.txt   # requirements.txt + pytest/httpx untuk dev
+pip install -r requirements-dev.txt   # requirements.txt + pytest/httpx for local dev
 cp ../training/master_dataset_godzilla_elnino_2000_2025.csv data/master_dataset.csv
 uvicorn app.main:app --reload --port 8000
 ```
 
-Buka http://localhost:8000/docs untuk dokumentasi API interaktif (Swagger). Tombol
-**Authorize** di Swagger memakai JWT dari `/api/auth/login` — lihat
-[Autentikasi](#autentikasi) di bawah.
+Open http://localhost:8000/docs for interactive API documentation (Swagger).
+The **Authorize** button there accepts a JWT issued by `/api/auth/login` —
+see [Authentication](#authentication) below.
 
-### Docker (opsional, jalankan backend + frontend sekaligus)
+### Docker (optional — runs backend and frontend together)
 
 ```bash
 docker compose up --build
 ```
 
-Backend di http://localhost:8000, frontend di http://localhost:5173.
+Backend at http://localhost:8000, frontend at http://localhost:5173.
 
 ### 3. Frontend
 
@@ -117,49 +125,50 @@ npm install
 npm run dev
 ```
 
-Buka http://localhost:5173. Vite otomatis mem-proxy `/api` ke backend.
+Open http://localhost:5173. Vite automatically proxies `/api` requests to
+the backend.
 
 ---
 
-## Endpoint API
+## API Endpoints
 
-| Method | Path                        | Fungsi                                     |
-|--------|-----------------------------|--------------------------------------------|
-| GET    | `/api/metrics`              | R², RMSE, MAE (train & test)               |
-| GET    | `/api/historical?island=`   | Deret waktu SDCI + ONI per pulau           |
-| GET    | `/api/historical-fit`       | Garis prediksi model pada data historis    |
-| GET    | `/api/forecast`             | Proyeksi 2026 (skenario default)           |
-| GET    | `/api/feature-importance`   | SHAP & gain feature importance             |
-| GET    | `/api/islands`              | Ringkasan + status kekeringan 8 pulau      |
-| GET    | `/api/simulate?oni_increment=` | Simulasi what-if real-time              |
+| Method | Path                            | Purpose                                   |
+|--------|----------------------------------|--------------------------------------------|
+| GET    | `/api/metrics`                  | R², RMSE, MAE (train & test)               |
+| GET    | `/api/historical?island=`       | Historical SDCI + ONI time series per island |
+| GET    | `/api/historical-fit`           | Model fit line on historical data          |
+| GET    | `/api/forecast`                 | 2026 projection (default scenario)         |
+| GET    | `/api/feature-importance`       | SHAP & gain feature importance             |
+| GET    | `/api/islands`                  | Summary + drought status for 8 islands     |
+| GET    | `/api/simulate?oni_increment=`  | Real-time what-if simulation               |
 
-Endpoint di atas semuanya publik (dashboard read-only, tanpa login). Endpoint
-auth (baru) ada di bawah.
+All endpoints above are public (read-only dashboard, no login required). The
+authentication endpoints are listed separately below.
 
 ---
 
-## Autentikasi
+## Authentication
 
-Dashboard tetap publik, tapi ada sistem login JWT terpisah untuk endpoint
-admin (`/api/admin/*`):
+The dashboard itself stays public, but there is a separate JWT-based login
+system that protects the admin surface (`/api/admin/*`):
 
-| Method | Path                | Fungsi                                          |
-|--------|---------------------|--------------------------------------------------|
-| POST   | `/api/auth/register`| Daftar user baru (`{username, password}`)       |
-| POST   | `/api/auth/login`   | Login (form-encoded), dapat JWT access token    |
-| GET    | `/api/auth/me`      | Data user yang sedang login (butuh token)       |
-| GET    | `/api/admin/stats`  | Statistik admin (butuh token dengan `is_admin`) |
+| Method | Path                  | Purpose                                             |
+|--------|-----------------------|------------------------------------------------------|
+| POST   | `/api/auth/register`  | Register a new user (`{username, password}`)        |
+| POST   | `/api/auth/login`     | Log in (form-encoded), returns a JWT access token   |
+| GET    | `/api/auth/me`        | Return the currently authenticated user             |
+| GET    | `/api/admin/stats`    | Admin-only stats (requires a token with `is_admin`)  |
 
-User baru bukan admin secara default. Untuk menjadikan admin (dipakai untuk
-testing lokal):
+New users are not admins by default. To promote a user to admin (useful for
+local testing):
 ```bash
 cd backend
 python -m app.auth.promote_admin <username>
 ```
 
-`SECRET_KEY` untuk menandatangani JWT diambil dari env var `SECRET_KEY`
-(ada default tidak aman untuk dev). Lihat [DEPLOY.md](DEPLOY.md) untuk cara
-generate secret key production.
+The `SECRET_KEY` used to sign JWTs comes from the `SECRET_KEY` environment
+variable (an insecure default is used for local dev only). See
+[DEPLOY.md](DEPLOY.md) for how to generate a production secret key.
 
 ---
 
@@ -173,37 +182,39 @@ pytest
 
 ---
 
-## Deploy
+## Deployment
 
-- **Backend** → Railway / Render (via Docker, lihat `backend/Dockerfile` &
-  `backend/railway.json`). Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
-  Env var yang perlu diset: `SECRET_KEY`, `ENVIRONMENT=production`,
-  `CORS_ALLOWED_ORIGINS=<url-frontend>`.
-- **Frontend** → Vercel (`frontend/vercel.json` sudah disiapkan) / Netlify.
-  Build: `npm run build`, output: `dist/`. Set env `VITE_API_URL` ke URL
-  backend production.
+- **Backend** → Railway / Render (via Docker — see `backend/Dockerfile` and
+  `backend/railway.json`). Start command:
+  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+  Required env vars: `SECRET_KEY`, `ENVIRONMENT=production`,
+  `CORS_ALLOWED_ORIGINS=<frontend-url>`.
+- **Frontend** → Vercel (`frontend/vercel.json` already included) / Netlify.
+  Build command: `npm run build`, output directory: `dist/`. Set the
+  `VITE_API_URL` env var to the production backend URL.
 
-Langkah lengkap step-by-step ada di [DEPLOY.md](DEPLOY.md).
-
----
-
-## Catatan Teknis
-
-- Model disimpan dalam **format native XGBoost (.json)**, bukan pickle —
-  lebih aman & portabel antar versi.
-- Feature engineering **identik** antara `training/train.py` dan
-  `backend/app/features.py`. Ini penting: kalau pipeline fitur beda antara
-  training & serving, prediksi bisa ngaco (*training-serving skew*).
-- Simulasi *what-if* menghitung ulang fitur kinematika ONI dan menjalankan
-  3 model kuantil setiap kali slider digeser.
+Full step-by-step instructions are in [DEPLOY.md](DEPLOY.md).
 
 ---
 
-## Lisensi
+## Technical Notes
 
-Proyek ini dilisensikan di bawah [MIT License](LICENSE).
+- Models are stored in **native XGBoost format (.json)**, not pickle — safer
+  and more portable across versions.
+- Feature engineering is **identical** between `training/train.py` and
+  `backend/app/features.py`. This matters: if the feature pipeline diverges
+  between training and serving, predictions can silently degrade
+  (*training-serving skew*).
+- The what-if simulation recomputes ONI kinematic features and re-runs all
+  three quantile models live every time the slider moves.
 
 ---
 
-Data: CHIRPS · MODIS · NOAA OISST (2000–2025). Berdasarkan riset
-"Forecasting Dampak Potensi Godzilla El Niño 2026" (UNNES, 2026).
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+Data sources: CHIRPS · MODIS · NOAA OISST (2000–2025). Based on the research
+"Forecasting the Potential Impact of the Godzilla El Niño 2026" (UNNES, 2026).
