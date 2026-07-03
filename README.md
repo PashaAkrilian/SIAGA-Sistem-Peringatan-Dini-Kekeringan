@@ -26,6 +26,7 @@ Dibangun dari notebook riset `godzila-el-nino.ipynb` menjadi aplikasi
 - [Tech Stack](#tech-stack)
 - [Menjalankan Secara Lokal](#menjalankan-secara-lokal)
 - [Endpoint API](#endpoint-api)
+- [Autentikasi](#autentikasi)
 - [Testing](#testing)
 - [Deploy](#deploy)
 - [Catatan Teknis](#catatan-teknis)
@@ -64,9 +65,10 @@ Tiga bagian:
 | Layer      | Bahasa / Tools                                                  |
 |------------|-------------------------------------------------------------------|
 | Backend    | Python · FastAPI · Uvicorn · Pydantic                             |
+| Auth       | PyJWT · bcrypt · SQLite (stdlib `sqlite3`)                         |
 | ML / Data  | XGBoost · pandas · NumPy · scikit-learn · SHAP · Optuna           |
 | Frontend   | JavaScript (JSX) · React 18 · Vite · Recharts · CSS               |
-| Deploy     | Railway / Render (backend) · Vercel / Netlify (frontend)          |
+| Deploy     | Docker · Railway / Render (backend) · Vercel / Netlify (frontend) |
 
 ---
 
@@ -90,12 +92,22 @@ file JSON (metrics, historical, forecast, feature importance).
 
 ```bash
 cd backend
-pip install -r requirements.txt
+pip install -r requirements-dev.txt   # requirements.txt + pytest/httpx untuk dev
 cp ../training/master_dataset_godzilla_elnino_2000_2025.csv data/master_dataset.csv
 uvicorn app.main:app --reload --port 8000
 ```
 
-Buka http://localhost:8000/docs untuk dokumentasi API interaktif (Swagger).
+Buka http://localhost:8000/docs untuk dokumentasi API interaktif (Swagger). Tombol
+**Authorize** di Swagger memakai JWT dari `/api/auth/login` — lihat
+[Autentikasi](#autentikasi) di bawah.
+
+### Docker (opsional, jalankan backend + frontend sekaligus)
+
+```bash
+docker compose up --build
+```
+
+Backend di http://localhost:8000, frontend di http://localhost:5173.
 
 ### 3. Frontend
 
@@ -121,12 +133,41 @@ Buka http://localhost:5173. Vite otomatis mem-proxy `/api` ke backend.
 | GET    | `/api/islands`              | Ringkasan + status kekeringan 8 pulau      |
 | GET    | `/api/simulate?oni_increment=` | Simulasi what-if real-time              |
 
+Endpoint di atas semuanya publik (dashboard read-only, tanpa login). Endpoint
+auth (baru) ada di bawah.
+
+---
+
+## Autentikasi
+
+Dashboard tetap publik, tapi ada sistem login JWT terpisah untuk endpoint
+admin (`/api/admin/*`):
+
+| Method | Path                | Fungsi                                          |
+|--------|---------------------|--------------------------------------------------|
+| POST   | `/api/auth/register`| Daftar user baru (`{username, password}`)       |
+| POST   | `/api/auth/login`   | Login (form-encoded), dapat JWT access token    |
+| GET    | `/api/auth/me`      | Data user yang sedang login (butuh token)       |
+| GET    | `/api/admin/stats`  | Statistik admin (butuh token dengan `is_admin`) |
+
+User baru bukan admin secara default. Untuk menjadikan admin (dipakai untuk
+testing lokal):
+```bash
+cd backend
+python -m app.auth.promote_admin <username>
+```
+
+`SECRET_KEY` untuk menandatangani JWT diambil dari env var `SECRET_KEY`
+(ada default tidak aman untuk dev). Lihat [DEPLOY.md](DEPLOY.md) untuk cara
+generate secret key production.
+
 ---
 
 ## Testing
 
 ```bash
 cd backend
+pip install -r requirements-dev.txt
 pytest
 ```
 
@@ -134,10 +175,15 @@ pytest
 
 ## Deploy
 
-- **Backend** → Railway / Render. Start command:
-  `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-- **Frontend** → Vercel / Netlify. Build: `npm run build`, output: `dist/`.
-  Set env `VITE_API_URL` ke URL backend production.
+- **Backend** → Railway / Render (via Docker, lihat `backend/Dockerfile` &
+  `backend/railway.json`). Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+  Env var yang perlu diset: `SECRET_KEY`, `ENVIRONMENT=production`,
+  `CORS_ALLOWED_ORIGINS=<url-frontend>`.
+- **Frontend** → Vercel (`frontend/vercel.json` sudah disiapkan) / Netlify.
+  Build: `npm run build`, output: `dist/`. Set env `VITE_API_URL` ke URL
+  backend production.
+
+Langkah lengkap step-by-step ada di [DEPLOY.md](DEPLOY.md).
 
 ---
 

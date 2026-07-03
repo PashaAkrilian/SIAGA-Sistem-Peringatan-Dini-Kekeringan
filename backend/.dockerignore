@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.git/
+.env
+test_*.py
+conftest.py
+requirements-dev.txt
+database/
+instance/

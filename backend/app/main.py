@@ -10,9 +10,13 @@ Jalankan dev server:
 Dokumentasi interaktif otomatis tersedia di:
     http://localhost:8000/docs
 """
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
+from . import config
+from .auth import db as auth_db
+from .auth.router import router as auth_router
+from .auth.security import get_current_admin_user
 from .model_service import service
 from .schemas import (
     FeatureImportanceResponse,
@@ -33,18 +37,28 @@ app = FastAPI(
 )
 
 # CORS: izinkan frontend (Vite dev server & production) memanggil API ini.
+# Origin production diatur lewat env var CORS_ALLOWED_ORIGINS (dipisah koma),
+# supaya tidak perlu mencampur wildcard "*" dengan allow_credentials=True.
+_default_origins = [
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+]
+_env_origins = [o.strip() for o in config.CORS_ALLOWED_ORIGINS.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:4173",
-        "http://127.0.0.1:5173",
-        "*",  # untuk demo; di production sebaiknya dibatasi ke domain frontend
-    ],
+    allow_origins=_env_origins or _default_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router, prefix="/api/auth", tags=["Auth"])
+
+
+@app.on_event("startup")
+def _startup():
+    auth_db.init_db()
 
 
 @app.get("/")
@@ -126,3 +140,9 @@ def simulate(
     """Simulasi what-if real-time: ubah skenario kenaikan ONI, dapatkan
     proyeksi 2026 baru. Model kuantil dihitung ulang secara live."""
     return service.simulate(oni_increment=oni_increment, start_oni=start_oni)
+
+
+@app.get("/api/admin/stats", tags=["Admin"])
+def admin_stats(_admin=Depends(get_current_admin_user)):
+    """Statistik singkat, khusus admin (butuh JWT dengan is_admin=true)."""
+    return {"total_registered_users": auth_db.count_users(), "server_status": "ok"}

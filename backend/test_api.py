@@ -64,3 +64,21 @@ def test_feature_importance():
     body = r.json()
     assert len(body["shap"]) > 0
     assert len(body["gain"]) > 0
+
+
+def test_public_endpoints_need_no_auth():
+    """Dashboard tetap publik: semua endpoint GET ini harus 200 tanpa header
+    Authorization, meski sistem auth JWT sudah ditambahkan di /api/auth/*."""
+    public_paths = [
+        "/api/health",
+        "/api/metrics",
+        "/api/historical",
+        "/api/historical-fit",
+        "/api/forecast",
+        "/api/feature-importance",
+        "/api/islands",
+        "/api/simulate",
+    ]
+    for path in public_paths:
+        r = client.get(path)
+        assert r.status_code == 200, f"{path} -> {r.status_code}"
